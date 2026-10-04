@@ -1,12 +1,15 @@
 import { useState } from 'react'
-import { Button, Checkbox, Select, Space, Tag, Typography, message } from 'antd'
+import { Button, Checkbox, Select, Space, Table, Tag, Typography, message } from 'antd'
 import { DownloadOutlined, FilePdfOutlined } from '@ant-design/icons'
 import { useIssues } from '../api/useIssues'
 import { useWorkspaceStore } from '../store/useWorkspaceStore'
+import { formatBatchTime, summarizeBatch } from '../api/batchUtils'
+import type { TrackedBatch } from '../api/types'
 
 export default function ReportPage() {
   useIssues()
   const issues = useWorkspaceStore((state) => state.issues)
+  const batches = useWorkspaceStore((state) => state.batches)
   const [site, setSite] = useState('全部站点')
   const [includeEvidence, setIncludeEvidence] = useState(true)
   const [includeHistory, setIncludeHistory] = useState(true)
@@ -14,8 +17,8 @@ export default function ReportPage() {
 
   const exportCsv = () => {
     const rows = [
-      ['编号', '站点', '版本', '问题', 'WCAG', '影响', '状态', '团队', '负责人', '截止日期'],
-      ...visible.map((issue) => [issue.key, issue.site, issue.version, issue.title, issue.wcag.join(' / '), issue.impact, issue.status, issue.team, issue.owner, issue.dueDate]),
+      ['编号', '站点', '版本', '问题', 'WCAG', '影响', '状态', '团队', '负责人', '截止日期', '最近批次'],
+      ...visible.map((issue) => [issue.key, issue.site, issue.version, issue.title, issue.wcag.join(' / '), issue.impact, issue.status, issue.team, issue.owner, issue.dueDate, issue.lastBatchNo ?? '']),
     ]
     const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(',')).join('\n')
     const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }))
@@ -26,6 +29,38 @@ export default function ReportPage() {
     URL.revokeObjectURL(url)
     message.success('报告已导出')
   }
+
+  const batchColumns = [
+    { title: '批次号', dataIndex: 'batchNo', width: 210, render: (value: string) => <Typography.Text strong>{value}</Typography.Text> },
+    { title: '提交时间', dataIndex: 'createdAt', width: 100, render: (value: string) => formatBatchTime(value) },
+    { title: '指派内容', key: 'payload', width: 260, render: (_: unknown, record: TrackedBatch) => `${record.payload.team} / ${record.payload.owner} · ${record.payload.priority} · 截止 ${record.payload.dueDate}` },
+    {
+      title: '条目结论（按当前台账重算）',
+      key: 'counts',
+      render: (_: unknown, record: TrackedBatch) => {
+        const { counts, total } = summarizeBatch(record, issues)
+        return (
+          <Space size={4} wrap>
+            <Tag color="success">生效 {counts.applied}</Tag>
+            <Tag>无变化 {counts.unchanged}</Tag>
+            <Tag color="error">冲突跳过 {counts.conflict}</Tag>
+            <Tag color="orange">待恢复 {counts.pending}</Tag>
+            <Tag color="warning">已失效 {counts.invalidated}</Tag>
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>/ 共 {total}</Typography.Text>
+          </Space>
+        )
+      },
+    },
+    {
+      title: '批次状态',
+      key: 'status',
+      width: 130,
+      render: (_: unknown, record: TrackedBatch) => {
+        const summary = summarizeBatch(record, issues)
+        return <Tag color={summary.color}>{summary.label}</Tag>
+      },
+    },
+  ]
 
   return (
     <section className="page">
@@ -48,6 +83,13 @@ export default function ReportPage() {
           <Checkbox checked={includeEvidence} onChange={(event) => setIncludeEvidence(event.target.checked)}>包含证据链接</Checkbox>
           <Checkbox checked={includeHistory} onChange={(event) => setIncludeHistory(event.target.checked)}>包含操作历史</Checkbox>
         </Space>
+      </div>
+
+      <div className="panel" style={{ marginBottom: 14 }}>
+        <div className="panel-head"><h3>整改批次结论</h3><span className="muted">负责人或优先级被后续调整时，旧批次结论自动失效并重算</span></div>
+        <div className="table-wrap">
+          <Table rowKey="batchNo" columns={batchColumns} dataSource={batches} pagination={false} scroll={{ x: 900 }} locale={{ emptyText: '暂无整改批次' }} />
+        </div>
       </div>
 
       <article className="panel report-sheet">

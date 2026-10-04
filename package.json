@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 62047",
     "build": "tsc -b && vite build",
-    "preview": "vite preview --host 0.0.0.0 --port 62047"
+    "preview": "vite preview --host 0.0.0.0 --port 62047",
+    "test": "esbuild test/batchFlow.test.ts --bundle --platform=node --format=esm --packages=external --outfile=.test-build/batchFlow.test.mjs && node .test-build/batchFlow.test.mjs"
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",

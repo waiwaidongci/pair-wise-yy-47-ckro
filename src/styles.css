@@ -49,6 +49,8 @@ body { min-width: 320px; }
 .timeline-item { padding: 0 0 16px 14px; border-left: 2px solid #cbd8dc; position: relative; }
 .timeline-item:before { content: ""; position: absolute; left: -5px; top: 2px; width: 8px; height: 8px; border-radius: 50%; background: #277984; box-shadow: 0 0 0 3px white; }
 .review-grid, .report-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 14px; align-items: start; }
+.batch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #edf1f2; }
+.batch-row:last-child { border-bottom: 0; }
 .review-box { padding: 16px; }
 .report-sheet { padding: 24px; }
 .report-sheet h2 { margin: 0 0 4px; }
