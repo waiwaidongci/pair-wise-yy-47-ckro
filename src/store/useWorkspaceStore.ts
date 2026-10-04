@@ -58,8 +58,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       updateIssue: (updated) => set((state) => ({ issues: state.issues.map((issue) => (issue.key === updated.key ? updated : issue)) })),
     }),
     {
-      name: 'accessibility-remediation-v1',
-      version: 1,
+      name: 'accessibility-remediation-v2',
+      version: 2,
     },
   ),
 )

@@ -5,6 +5,7 @@ import IssuesPage from './pages/IssuesPage'
 import RetestPage from './pages/RetestPage'
 import VersionsPage from './pages/VersionsPage'
 import ReportPage from './pages/ReportPage'
+import BatchesPage from './pages/BatchesPage'
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/issues" element={<IssuesPage />} />
         <Route path="/retest" element={<RetestPage />} />
+        <Route path="/batches" element={<BatchesPage />} />
         <Route path="/versions" element={<VersionsPage />} />
         <Route path="/report" element={<ReportPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

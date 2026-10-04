@@ -15,7 +15,7 @@ export default function ReportPage() {
   const exportCsv = () => {
     const rows = [
       ['编号', '站点', '版本', '问题', 'WCAG', '影响', '状态', '团队', '负责人', '截止日期'],
-      ...visible.map((issue) => [issue.key, issue.site, issue.version, issue.title, issue.wcag.join(' / '), issue.impact, issue.status, issue.team, issue.owner, issue.dueDate]),
+      ...visible.map((issue) => [issue.key, issue.site, issue.siteVersion, issue.title, issue.wcag.join(' / '), issue.impact, issue.status, issue.team, issue.owner, issue.dueDate]),
     ]
     const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(',')).join('\n')
     const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }))
@@ -61,7 +61,7 @@ export default function ReportPage() {
             {visible.map((issue) => (
               <tr key={issue.key}>
                 <td>{issue.key}</td>
-                <td>{issue.site}<br /><Typography.Text type="secondary">{issue.version}</Typography.Text></td>
+                <td>{issue.site}<br /><Typography.Text type="secondary">{issue.siteVersion}</Typography.Text></td>
                 <td><strong>{issue.title}</strong><br />{issue.wcag.join(' / ')}{includeEvidence && <><br /><Typography.Link href={issue.evidence}>查看证据</Typography.Link></>}</td>
                 <td><Tag color={issue.impact === '致命' ? 'red' : issue.impact === '严重' ? 'volcano' : 'gold'}>{issue.impact}</Tag></td>
                 <td>{issue.status}<br />{issue.team} / {issue.owner}</td>
